@@ -6,6 +6,26 @@ import java.time.Duration;
 import java.time.Instant;
 
 public class TimerState {
+
+	private static final int HOURS_PER_DAY = 24;
+	private static final int MINUTES_PER_HOUR = 60;
+	private static final int SECONDS_PER_MINUTE = 60;
+	private static final int SECONDS_PER_HOUR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
+	private static final long NANOS_PER_SECOND = 1_000_000_000L;
+	/**
+	 * Nanos per minute.
+	 */
+	static final long NANOS_PER_MINUTE = NANOS_PER_SECOND * SECONDS_PER_MINUTE;
+	/**
+	 * Nanos per hour.
+	 */
+	static final long NANOS_PER_HOUR = NANOS_PER_MINUTE * MINUTES_PER_HOUR;
+	/**
+	 * Nanos per day.
+	 */
+	static final long NANOS_PER_DAY = NANOS_PER_HOUR * HOURS_PER_DAY;
+
+
 	private final Duration duration;
 	private final Instant startTime;
 
@@ -47,9 +67,39 @@ public class TimerState {
 	}
 
 	public String getRemainingFormatted(Instant now) {
-		Duration remaining = getRemaining(now);
-		// TODO fancy formatting
-		return remaining.toString();
+		return formatDuration(getRemaining(now));
+	}
+
+	private String formatDuration(Duration duration) {
+		if (duration == Duration.ZERO) {
+			return "0s";
+		}
+		final long seconds = duration.getSeconds();
+		final int nanos = duration.getNano();
+		long effectiveTotalSecs = seconds;
+		if (seconds < 0 && nanos > 0) {
+			effectiveTotalSecs++;
+		}
+		final long hours = effectiveTotalSecs / SECONDS_PER_HOUR;
+		final int minutes = (int) ((effectiveTotalSecs % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE);
+		final int secs = (int) (effectiveTotalSecs % SECONDS_PER_MINUTE);
+		final StringBuilder sb = new StringBuilder();
+		if (hours != 0) {
+			sb.append(hours).append('h');
+		}
+		if (hours != 0 || minutes != 0) {
+			if (sb.length() != 0) {
+				sb.append(' ');
+			}
+			sb.append(minutes).append('m');
+		}
+		if (hours != 0 || minutes != 0 || secs != 0) {
+			if (sb.length() != 0) {
+				sb.append(' ');
+			}
+			sb.append(secs).append('s');
+		}
+		return sb.toString();
 	}
 
 	public double getElapsedPercent(Instant now) {
@@ -61,7 +111,7 @@ public class TimerState {
 
 	private static BigDecimal convertDurationToNanos(Duration duration) {
 		return BigDecimal.valueOf(duration.getSeconds())
-				.multiply(BigDecimal.valueOf(1_000_000_000L))
+				.multiply(BigDecimal.valueOf(NANOS_PER_SECOND))
 				.add(BigDecimal.valueOf(duration.getNano()));
 	}
 
