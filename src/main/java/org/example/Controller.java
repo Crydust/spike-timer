@@ -4,11 +4,16 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+import javax.swing.Timer;
+
 public class Controller {
 	private final Model model;
+	private final Timer timer;
 
 	public Controller(Model model) {
 		this.model = model;
+		this.timer = new Timer(1000, e -> this.tick(Instant.now()));
+		this.timer.start();
 	}
 
 	public void start(String text, Instant now) {
@@ -30,5 +35,9 @@ public class Controller {
 	public void restart(Instant now) {
 		model.setTimerState(new TimerState(model.getTimerState().getDuration(), now));
 		model.setRunning(true);
+	}
+
+	public void stop() {
+		timer.stop();
 	}
 }

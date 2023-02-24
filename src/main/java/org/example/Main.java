@@ -33,14 +33,6 @@ public class Main {
 		final Controller controller = new Controller(model);
 		final View view = new View(controller);
 		model.addPropertyChangeListener(view);
-		Timer timer = new Timer(1000, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				controller.tick(Instant.now());
-			}
-		});
-		timer.start();
-		// TODO controller
 		SwingUtilities.invokeLater(() -> {
 			JFrame app = new JFrame("Timer");
 			JPanel panel = view.getPanel();
@@ -57,7 +49,7 @@ public class Main {
 			app.addWindowListener(new WindowAdapter() {
 				@Override
 				public void windowClosing(WindowEvent windowEvent) {
-					//TODO
+					controller.stop();
 					System.exit(0);
 				}
 			});
