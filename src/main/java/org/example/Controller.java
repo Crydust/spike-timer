@@ -33,6 +33,9 @@ public class Controller {
 			TimerState timerState = model.getTimerState();
 			if (timerState.getElapsedPercent(now) >= 1.0) {
 				model.setRunning(false);
+				model.setElapsedPercent(100);
+				model.setElapsedPerMille(1_000);
+				model.setRemainingFormatted("Done!");
 			} else {
 				model.setTimerState(timerState);
 				model.setElapsedPercent((int) Math.round(timerState.getElapsedPercent(now) * 100));
