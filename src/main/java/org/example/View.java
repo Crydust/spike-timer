@@ -11,7 +11,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.time.Instant;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -28,16 +27,11 @@ import javax.swing.text.StyleContext;
 public class View implements PropertyChangeListener {
 	private JTextField howLongTextField;
 	private JButton startButton;
-	private JButton restartButton;
 	private JPanel guiFormPanel;
 	private JLabel howLongLabel;
 	private JProgressBar elapsedProgressBar;
-	private JLabel remainingFormattedLabel;
 
 	private final Taskbar taskbar;
-
-	private TimerState timerState = null;
-	private Instant now = null;
 
 	public View(Controller controller) {
 		if (Taskbar.isTaskbarSupported()) {
@@ -55,13 +49,6 @@ public class View implements PropertyChangeListener {
 				}
 			}.execute();
 		});
-		restartButton.addActionListener(e -> new SwingWorker<Void, Void>() {
-			@Override
-			protected Void doInBackground() {
-				controller.restart(Instant.now());
-				return null;
-			}
-		}.execute());
 	}
 
 	public JPanel getPanel() {
@@ -70,23 +57,62 @@ public class View implements PropertyChangeListener {
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		final AtomicBoolean done = new AtomicBoolean(false);
 		switch (PropertyName.valueOf(evt.getPropertyName())) {
 			case TIMER_STATE -> {
-				this.timerState = (TimerState) evt.getNewValue();
+				// NOOP
 			}
 			case NOW -> {
-				this.now = (Instant) evt.getNewValue();
+				// NOOP
 			}
 			case RUNNING -> {
 				Boolean oldValue = (Boolean) evt.getOldValue();
 				Boolean newValue = (Boolean) evt.getNewValue();
 				if (oldValue && !newValue) {
-					done.set(true);
+					donePopup();
+					doneSound();
 				}
 			}
+			case PERCENT -> {
+				int percent = (int) evt.getNewValue();
+				SwingUtilities.invokeLater(() -> {
+					final JFrame jFrame = getJFrame();
+					if (jFrame != null && taskbar != null) {
+						if (percent <= 0 || percent >= 100) {
+							taskbar.setWindowProgressState(jFrame, Taskbar.State.OFF);
+						} else {
+							taskbar.setWindowProgressState(jFrame, Taskbar.State.NORMAL);
+							taskbar.setWindowProgressValue(jFrame, percent);
+						}
+					}
+				});
+			}
+			case PER_MILLE -> {
+				int perMille = (int) evt.getNewValue();
+				SwingUtilities.invokeLater(() -> elapsedProgressBar.setValue(perMille));
+			}
+			case REMAINING_FORMATTED -> {
+				String remainingFormatted = (String) evt.getNewValue();
+				SwingUtilities.invokeLater(() -> elapsedProgressBar.setString(remainingFormatted));
+			}
 		}
+	}
 
+	private void donePopup() {
+		final JFrame jFrame = getJFrame();
+		if (jFrame != null) {
+			if (jFrame.getState() != Frame.NORMAL) {
+				jFrame.setState(Frame.NORMAL);
+			}
+			jFrame.toFront();
+			jFrame.repaint();
+		}
+	}
+
+	private static void doneSound() {
+		Toolkit.getDefaultToolkit().beep();
+	}
+
+	private JFrame getJFrame() {
 		final Container topLevelAncestor = this.getPanel().getTopLevelAncestor();
 		final JFrame jFrame;
 		if (topLevelAncestor instanceof JFrame) {
@@ -94,34 +120,7 @@ public class View implements PropertyChangeListener {
 		} else {
 			jFrame = null;
 		}
-
-		if (this.timerState != null && this.now != null) {
-			final String remainingFormatted = timerState.getRemainingFormatted(this.now);
-			final double elapsedPercent = timerState.getElapsedPercent(this.now);
-
-			SwingUtilities.invokeLater(() -> {
-				remainingFormattedLabel.setText(remainingFormatted);
-				elapsedProgressBar.setValue((int) (elapsedPercent * 100));
-				if (jFrame != null && taskbar != null) {
-					if (elapsedPercent <= 0.0 || elapsedPercent >= 1.0) {
-						taskbar.setWindowProgressState(jFrame, Taskbar.State.OFF);
-					} else {
-						taskbar.setWindowProgressState(jFrame, Taskbar.State.NORMAL);
-						taskbar.setWindowProgressValue(jFrame, (int) (elapsedPercent * 100));
-					}
-				}
-				if (done.get()) {
-					if (jFrame != null) {
-						if (jFrame.getState() != Frame.NORMAL) {
-							jFrame.setState(Frame.NORMAL);
-						}
-						jFrame.toFront();
-						jFrame.repaint();
-					}
-					Toolkit.getDefaultToolkit().beep();
-				}
-			});
-		}
+		return jFrame;
 	}
 
 	{
@@ -147,7 +146,6 @@ public class View implements PropertyChangeListener {
 		gbc = new GridBagConstraints();
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		gbc.gridwidth = 2;
 		gbc.weightx = 1.0;
 		gbc.anchor = GridBagConstraints.WEST;
 		guiFormPanel.add(howLongLabel, gbc);
@@ -156,7 +154,6 @@ public class View implements PropertyChangeListener {
 		gbc = new GridBagConstraints();
 		gbc.gridx = 0;
 		gbc.gridy = 1;
-		gbc.gridwidth = 2;
 		gbc.anchor = GridBagConstraints.WEST;
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		guiFormPanel.add(howLongTextField, gbc);
@@ -183,40 +180,20 @@ public class View implements PropertyChangeListener {
 		final JPanel spacer3 = new JPanel();
 		gbc = new GridBagConstraints();
 		gbc.gridx = 0;
-		gbc.gridy = 8;
+		gbc.gridy = 6;
 		gbc.fill = GridBagConstraints.VERTICAL;
 		guiFormPanel.add(spacer3, gbc);
-		remainingFormattedLabel = new JLabel();
-		Font remainingFormattedLabelFont = this.$$$getFont$$$(null, -1, 36, remainingFormattedLabel.getFont());
-		if (remainingFormattedLabelFont != null) remainingFormattedLabel.setFont(remainingFormattedLabelFont);
-		remainingFormattedLabel.setText("0h 0m 0s");
+		elapsedProgressBar = new JProgressBar();
+		Font elapsedProgressBarFont = this.$$$getFont$$$(null, -1, 36, elapsedProgressBar.getFont());
+		if (elapsedProgressBarFont != null) elapsedProgressBar.setFont(elapsedProgressBarFont);
+		elapsedProgressBar.setMaximum(1000);
+		elapsedProgressBar.setString("0h 0m 0s");
+		elapsedProgressBar.setStringPainted(true);
 		gbc = new GridBagConstraints();
 		gbc.gridx = 0;
 		gbc.gridy = 5;
-		gbc.gridwidth = 2;
-		gbc.weightx = 1.0;
-		gbc.anchor = GridBagConstraints.WEST;
-		guiFormPanel.add(remainingFormattedLabel, gbc);
-		elapsedProgressBar = new JProgressBar();
-		gbc = new GridBagConstraints();
-		gbc.gridx = 0;
-		gbc.gridy = 7;
-		gbc.gridwidth = 2;
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		guiFormPanel.add(elapsedProgressBar, gbc);
-		final JPanel spacer4 = new JPanel();
-		gbc = new GridBagConstraints();
-		gbc.gridx = 0;
-		gbc.gridy = 6;
-		gbc.fill = GridBagConstraints.VERTICAL;
-		guiFormPanel.add(spacer4, gbc);
-		restartButton = new JButton();
-		restartButton.setText("Restart");
-		gbc = new GridBagConstraints();
-		gbc.gridx = 1;
-		gbc.gridy = 3;
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		guiFormPanel.add(restartButton, gbc);
 	}
 
 	/**
