@@ -1,4 +1,4 @@
-package org.example;
+package be.crydust.spiketimer;
 
 import java.awt.Dimension;
 import java.awt.Image;
