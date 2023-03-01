@@ -6,7 +6,7 @@
 
     <groupId>be.crydust.spiketimer</groupId>
     <artifactId>spike-timer</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.2-SNAPSHOT</version>
     <packaging>jlink</packaging>
 
     <properties>
