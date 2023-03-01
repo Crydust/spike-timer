@@ -6,7 +6,6 @@
 --name spike-timer
 --dest .\target
 --vendor vendor
---verbose
 --runtime-image .\target\maven-jlink\default
 --module be.crydust.spiketimer/be.crydust.spiketimer.Main
 --win-menu
