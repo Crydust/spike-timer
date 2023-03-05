@@ -15,16 +15,15 @@ public class TimerState {
 	/**
 	 * Nanos per minute.
 	 */
-	static final long NANOS_PER_MINUTE = NANOS_PER_SECOND * SECONDS_PER_MINUTE;
+	private static final long NANOS_PER_MINUTE = NANOS_PER_SECOND * SECONDS_PER_MINUTE;
 	/**
 	 * Nanos per hour.
 	 */
-	static final long NANOS_PER_HOUR = NANOS_PER_MINUTE * MINUTES_PER_HOUR;
+	private static final long NANOS_PER_HOUR = NANOS_PER_MINUTE * MINUTES_PER_HOUR;
 	/**
 	 * Nanos per day.
 	 */
-	static final long NANOS_PER_DAY = NANOS_PER_HOUR * HOURS_PER_DAY;
-
+	private static final long NANOS_PER_DAY = NANOS_PER_HOUR * HOURS_PER_DAY;
 
 	private final Duration duration;
 	private final Instant startTime;
@@ -70,36 +69,22 @@ public class TimerState {
 		return formatDuration(getRemaining(now));
 	}
 
-	private String formatDuration(Duration duration) {
-		if (duration == Duration.ZERO) {
+	/* package-private for testing */
+	static String formatDuration(Duration duration) {
+		if (duration.compareTo(Duration.ZERO) <= 0) {
 			return "0s";
 		}
 		final long seconds = duration.getSeconds();
-		final int nanos = duration.getNano();
-		long effectiveTotalSecs = seconds;
-		if (seconds < 0 && nanos > 0) {
-			effectiveTotalSecs++;
-		}
-		final long hours = effectiveTotalSecs / SECONDS_PER_HOUR;
-		final int minutes = (int) ((effectiveTotalSecs % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE);
-		final int secs = (int) (effectiveTotalSecs % SECONDS_PER_MINUTE);
-		final StringBuilder sb = new StringBuilder();
+		final long hours = seconds / SECONDS_PER_HOUR;
+		final int minutes = (int) ((seconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE);
+		final int secs = (int) (seconds % SECONDS_PER_MINUTE);
 		if (hours != 0) {
-			sb.append(hours).append('h');
+			return "%dh %dm %ds".formatted(hours, minutes, secs);
 		}
-		if (hours != 0 || minutes != 0) {
-			if (sb.length() != 0) {
-				sb.append(' ');
-			}
-			sb.append(minutes).append('m');
+		if (minutes != 0) {
+			return "%dm %ds".formatted(minutes, secs);
 		}
-		if (hours != 0 || minutes != 0 || secs != 0) {
-			if (sb.length() != 0) {
-				sb.append(' ');
-			}
-			sb.append(secs).append('s');
-		}
-		return sb.toString();
+		return "%ds".formatted(secs);
 	}
 
 	public double getElapsedPercent(Instant now) {
