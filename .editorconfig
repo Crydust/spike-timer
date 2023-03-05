@@ -1,0 +1,11 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+root = true
+
+[*.{java,xml}]
+charset = utf-8
+insert_final_newline = true
+indent_style = tab
+indent_size = 4
+tab_width = 4
+ij_continuation_indent_size = 8
