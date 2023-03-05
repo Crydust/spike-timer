@@ -1,10 +1,9 @@
 package be.crydust.spiketimer;
 
+import javax.swing.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-
-import javax.swing.Timer;
 
 public class Controller {
 	private final Model model;
@@ -29,7 +28,6 @@ public class Controller {
 
 	public void tick(Instant now) {
 		if (model.isRunning()) {
-			model.setNow(now);
 			TimerState timerState = model.getTimerState();
 			if (timerState.getElapsedPercent(now) >= 1.0) {
 				model.setRunning(false);

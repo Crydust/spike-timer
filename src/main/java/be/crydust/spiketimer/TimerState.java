@@ -37,18 +37,6 @@ public class TimerState {
 		this.duration = duration;
 	}
 
-	public Duration getDuration() {
-		return duration;
-	}
-
-	public Instant getStartTime() {
-		return startTime;
-	}
-
-	public Instant getEndTime() {
-		return startTime.plus(duration);
-	}
-
 	private Duration getElapsed(Instant now) {
 		Duration elapsed = Duration.between(startTime, now);
 		if (elapsed.compareTo(duration) > 0) {

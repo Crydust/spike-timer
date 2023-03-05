@@ -1,28 +1,13 @@
 package be.crydust.spiketimer;
 
-import java.awt.Container;
-import java.awt.Font;
-import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Taskbar;
-import java.awt.Toolkit;
+import javax.swing.*;
+import javax.swing.plaf.FontUIResource;
+import javax.swing.text.StyleContext;
+import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.time.Instant;
 import java.util.Locale;
-
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
-import javax.swing.plaf.FontUIResource;
-import javax.swing.text.StyleContext;
 
 public class View implements PropertyChangeListener {
 	private JTextField howLongTextField;
@@ -58,12 +43,6 @@ public class View implements PropertyChangeListener {
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		switch (PropertyName.valueOf(evt.getPropertyName())) {
-			case TIMER_STATE -> {
-				// NOOP
-			}
-			case NOW -> {
-				// NOOP
-			}
 			case RUNNING -> {
 				Boolean oldValue = (Boolean) evt.getOldValue();
 				Boolean newValue = (Boolean) evt.getNewValue();

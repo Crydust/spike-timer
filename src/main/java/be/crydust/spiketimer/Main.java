@@ -1,21 +1,13 @@
 package be.crydust.spiketimer;
 
-import java.awt.Dimension;
-import java.awt.Image;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.WindowConstants;
+import static java.util.Objects.requireNonNull;
 
 public class Main {
 	public static void main(String[] args) {
@@ -55,12 +47,12 @@ public class Main {
 	private static List<Image> getIconImages() {
 		Class<?> c = Main.class;
 		return Arrays.asList(
-				new ImageIcon(c.getResource("/icon_256x256.png")).getImage(),
-				new ImageIcon(c.getResource("/icon_128x128.png")).getImage(),
-				new ImageIcon(c.getResource("/icon_64x64.png")).getImage(),
-				new ImageIcon(c.getResource("/icon_48x48.png")).getImage(),
-				new ImageIcon(c.getResource("/icon_32x32.png")).getImage(),
-				new ImageIcon(c.getResource("/icon_16x16.png")).getImage()
+				new ImageIcon(requireNonNull(c.getResource("/icon_256x256.png"))).getImage(),
+				new ImageIcon(requireNonNull(c.getResource("/icon_128x128.png"))).getImage(),
+				new ImageIcon(requireNonNull(c.getResource("/icon_64x64.png"))).getImage(),
+				new ImageIcon(requireNonNull(c.getResource("/icon_48x48.png"))).getImage(),
+				new ImageIcon(requireNonNull(c.getResource("/icon_32x32.png"))).getImage(),
+				new ImageIcon(requireNonNull(c.getResource("/icon_16x16.png"))).getImage()
 		);
 	}
 }

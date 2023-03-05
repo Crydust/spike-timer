@@ -7,8 +7,7 @@ import java.time.Instant;
 
 public class Model {
 	private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-	private Instant now = Instant.now();
-	private TimerState timerState = new TimerState(Duration.ZERO, now);
+	private TimerState timerState = new TimerState(Duration.ZERO, Instant.now());
 	private boolean running = false;
 	private int elapsedPercent = 0;
 	private int elapsedPerMille = 0;
@@ -27,15 +26,7 @@ public class Model {
 	}
 
 	public void setTimerState(TimerState timerState) {
-		TimerState oldValue = this.timerState;
 		this.timerState = timerState;
-		this.pcs.firePropertyChange(PropertyName.TIMER_STATE.name(), oldValue, timerState);
-	}
-
-	public void setNow(Instant now) {
-		Instant oldValue = this.now;
-		this.now = now;
-		this.pcs.firePropertyChange(PropertyName.NOW.name(), oldValue, now);
 	}
 
 	public boolean isRunning() {
@@ -48,28 +39,16 @@ public class Model {
 		this.pcs.firePropertyChange(PropertyName.RUNNING.name(), oldValue, running);
 	}
 
-	public int getElapsedPercent() {
-		return elapsedPercent;
-	}
-
 	public void setElapsedPercent(int elapsedPercent) {
 		int oldValue = this.elapsedPercent;
 		this.elapsedPercent = elapsedPercent;
 		this.pcs.firePropertyChange(PropertyName.PERCENT.name(), oldValue, elapsedPercent);
 	}
 
-	public int getElapsedPerMille() {
-		return elapsedPerMille;
-	}
-
 	public void setElapsedPerMille(int elapsedPerMille) {
 		int oldValue = this.elapsedPerMille;
 		this.elapsedPerMille = elapsedPerMille;
 		this.pcs.firePropertyChange(PropertyName.PER_MILLE.name(), oldValue, elapsedPerMille);
-	}
-
-	public String getRemainingFormatted() {
-		return remainingFormatted;
 	}
 
 	public void setRemainingFormatted(String remainingFormatted) {
